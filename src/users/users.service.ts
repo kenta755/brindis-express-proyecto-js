@@ -15,7 +15,7 @@ export class UsersService {
   async create(userData: {
     email: string;
     nombre: string;
-    apellido: string;
+    apellido?: string;
     password: string;
     role?: string;
   }): Promise<User> {

@@ -16,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly usersService: UsersService,
              
   ) {
-    const SECRET: string =process.env.JWT_SECRET || 'fallback-secret';
+    const SECRET: string = process.env.JWT_SECRET || 'brazzino-secret-key-2026';
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,

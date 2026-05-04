@@ -45,8 +45,7 @@ export class AuthService implements OnModuleInit {
 
   async onModuleInit() {
     try {
-      const adminEmail = 'admin@brazzinos.com';
-      const adminPassword = await bcrypt.hash('Admin123!', 10);
+      const adminEmail = 'admin@brazzino.com';
       const adminName = 'Admin';
       const adminLastName = 'Principal';
 
@@ -60,7 +59,7 @@ export class AuthService implements OnModuleInit {
           email: adminEmail,
           nombre: adminName,
           apellido: adminLastName,
-          password: adminPassword,
+          password: 'Admin123!', // UsersService.create se encargará del hash
           role: 'admin',
           activo: true,
         };
@@ -71,12 +70,14 @@ export class AuthService implements OnModuleInit {
           role: newAdmin.role,
         });
       } else {
-        if (existingAdmin.role !== 'admin') {
-          await this.usersService.update(existingAdmin.id, { role: 'admin' });
-          console.log('Rol de administrador asignado a:', adminEmail);
-        } else {
-          console.log('Administrador ya existe con rol correcto:', adminEmail);
-        }
+        // Aseguramos que el admin tenga la contraseña correcta (corrigiendo posible doble hash anterior)
+        const hashedPassword = await bcrypt.hash('Admin123!', 10);
+        await this.usersService.update(existingAdmin.id, { 
+          role: 'admin',
+          password: hashedPassword,
+          activo: true 
+        });
+        console.log('Administrador actualizado y verificado:', adminEmail);
       }
     } catch (error) {
       console.error('Error en onModuleInit al configurar administrador:', error);
@@ -334,10 +335,8 @@ export class AuthService implements OnModuleInit {
 
       if (!user) {
         // Generamos una contraseña aleatoria fuerte para usuarios nuevos de Google
-        const randomPassword = await bcrypt.hash(
-          Math.random().toString(36).slice(-12) + Date.now(),
-          10,
-        );
+        // Pasamos el texto plano a create(), que se encarga de hashear
+        const randomPassword = Math.random().toString(36).slice(-12) + Date.now();
 
         user = await this.usersService.create({
           email,
@@ -349,6 +348,11 @@ export class AuthService implements OnModuleInit {
 
         console.log(`Usuario creado vía Google: ${email}`);
       } else {
+        // Check if existing user is active
+        if (user.activo === false) {
+          console.log(`🚫 Usuario inactivo intentó login con Google: ${email}`);
+          throw new UnauthorizedException('Usuario suspendido. Contacta al administrador.');
+        }
         console.log(`Usuario existente logueado vía Google: ${email}`);
       }
 
@@ -368,6 +372,8 @@ export class AuthService implements OnModuleInit {
           nombre: user.nombre,
           apellido: user.apellido,
           role: user.role,
+          activo: user.activo,
+          avatar: user.avatar,
         },
         access_token,
       };

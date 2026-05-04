@@ -21,7 +21,7 @@ import { DetalleDevolucionCompraModule } from './detalle-devolucion-compra/detal
 import { CategoriaModule } from './categoria/categoria.module';
 import { MetodoPagoModule } from './metodo_pago/metodo-pago.module';
 import { PromocionesModule } from './promociones/promociones.module';
-
+import { WebSocketModule } from './websocket/websocket.module';
 
 @Module({
   imports: [
@@ -64,10 +64,7 @@ import { PromocionesModule } from './promociones/promociones.module';
     CategoriaModule,
     PromocionesModule,
     MetodoPagoModule,
-    
-    
-
-    
+    WebSocketModule,
   ],
   controllers: [],
   providers: [

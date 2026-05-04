@@ -18,8 +18,8 @@ export class User {
   @Column({ length: 100 })
   nombre: string;
 
-  @Column({ length: 100 })
-  apellido: string;
+  @Column({ length: 100, nullable: true })
+  apellido?: string;
 
   @Column()
   @Exclude() // Excluir password de las respuestas JSON
