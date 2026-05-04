@@ -32,11 +32,11 @@ import { WebSocketModule } from './websocket/websocket.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('DB_HOST') || 'localhost',
-        port: configService.get<number>('DB_PORT') || 5432,
-        username: configService.get<string>('DB_USERNAME') || 'root',
-        password: configService.get<string>('DB_PASSWORD') || 'root',
-        database: configService.get<string>('DB_DATABASE') || 'brazzino',
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT') || 5432, // Puerto estándar de Postgres
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_DATABASE'),
         autoLoadEntities: true,
         synchronize: true, // Solo en desarrollo
         connectTimeout: 60000,
