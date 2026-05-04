@@ -15,9 +15,10 @@ async function bootstrap() {
     transform: true
   }));
   
+  // Agrega esta línea para que el frontend pueda conectarse
   app.enableCors();
-  
-  await app.listen(8222);
-  console.log('Aplicación corriendo en http://localhost:8222');
+
+  // Cambia el listen para que use el puerto de Render o el 3000 por defecto
+  await app.listen(process.env.PORT || 3000);
 }
-bootstrap();
+void bootstrap();
