@@ -31,14 +31,13 @@ import { WebSocketModule } from './websocket/websocket.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT') || 5432, // Puerto estándar de Postgres
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_DATABASE'),
-        autoLoadEntities: true,
-        synchronize: true, // Solo en desarrollo
+    type: 'postgres',
+    url: configService.get<string>('DATABASE_URL'), // Railway usa esta variable
+    autoLoadEntities: true,
+    synchronize: true, // Úsalo para que se creen las tablas de licores automáticamente
+    ssl: {
+      rejectUnauthorized: false,
+    },
         connectTimeout: 60000,
         acquireTimeout: 60000,
         retryAttempts: 3,
