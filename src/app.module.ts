@@ -29,21 +29,19 @@ import { WebSocketModule } from './websocket/websocket.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
+  imports: [ConfigModule],
+  useFactory: (configService: ConfigService) => ({
     type: 'postgres',
-    url: configService.get<string>('DATABASE_URL'), // Railway usa esta variable
+    // Usamos la URL completa que es más confiable en Railway
+    url: configService.get<string>('DATABASE_URL'), 
     autoLoadEntities: true,
-    synchronize: true, // Úsalo para que se creen las tablas de licores automáticamente
+    synchronize: true,
     ssl: {
-      rejectUnauthorized: false,
+      rejectUnauthorized: false, // Obligatorio para conexiones externas
     },
-        connectTimeout: 60000,
-        acquireTimeout: 60000,
-        retryAttempts: 3,
-        retryDelay: 3000,
-      }),
-      inject: [ConfigService],
+  }),
+  inject: [ConfigService],
+  
     }),
     AuthModule,
     UsersModule,
