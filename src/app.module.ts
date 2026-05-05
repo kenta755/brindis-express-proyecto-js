@@ -32,20 +32,38 @@ import { WebSocketModule } from './websocket/websocket.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
         const databaseUrl = configService.get<string>('DATABASE_URL');
+        const isRailway = configService.get<string>('RAILWAY_ENVIRONMENT') || process.env.RAILWAY_ENVIRONMENT;
         
         // For Railway: use DATABASE_URL with SSL
         // For local: use individual config
         if (databaseUrl) {
           console.log('Using DATABASE_URL for PostgreSQL connection');
+          
+          // Check if using private Railway networking (.internal domains)
+          // These don't work well in all cases, so we warn
+          if (databaseUrl.includes('.railway.internal')) {
+            console.warn('WARNING: Using private Railway database URL (.railway.internal)');
+            console.warn('If connection fails, use the PUBLIC database URL instead');
+          }
+          
           return {
             type: 'postgres',
             url: databaseUrl,
             autoLoadEntities: true,
             synchronize: true,
-            ssl: {
-              rejectUnauthorized: false,
+            ssl: isRailway ? { rejectUnauthorized: false } : false,
+            extra: {
+              // Connection pool settings for Railway
+              max: 10,
+              connectionTimeoutMillis: 30000,
+              idleTimeoutMillis: 10000,
             },
           };
+        }
+        
+        // Railway requires DATABASE_URL - fail if missing
+        if (isRailway) {
+          throw new Error('DATABASE_URL environment variable is required in Railway. Please add it in Variables tab.');
         }
         
         // Local development fallback
