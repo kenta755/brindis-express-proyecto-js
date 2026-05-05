@@ -15,8 +15,29 @@ async function bootstrap() {
     transform: true
   }));
   
-  // Agrega esta línea para que el frontend pueda conectarse
-  app.enableCors();
+  // CORS: Allow Vercel frontend and local development
+  const allowedOrigins = [
+    'http://localhost:5173',                    // Local dev
+    'http://localhost:3000',                    // Local dev alt
+    'https://brindis-express-proyecto-vue.vercel.app', // Your Vercel domain
+  ];
+  
+  app.enableCors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, etc)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log('Blocked by CORS:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+  });
 
   // Cambia el listen para que use el puerto de Render o el 3000 por defecto
   await app.listen(process.env.PORT || 3000);
