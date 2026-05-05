@@ -29,19 +29,39 @@ import { WebSocketModule } from './websocket/websocket.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
-  imports: [ConfigModule],
-  useFactory: (configService: ConfigService) => ({
-    type: 'postgres',
-    // Usamos la URL completa que es más confiable en Railway
-    url: configService.get<string>('DATABASE_URL'), 
-    autoLoadEntities: true,
-    synchronize: true,
-    ssl: {
-      rejectUnauthorized: false, // Obligatorio para conexiones externas
-    },
-  }),
-  inject: [ConfigService],
-  
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const databaseUrl = configService.get<string>('DATABASE_URL');
+        
+        // For Railway: use DATABASE_URL with SSL
+        // For local: use individual config
+        if (databaseUrl) {
+          console.log('Using DATABASE_URL for PostgreSQL connection');
+          return {
+            type: 'postgres',
+            url: databaseUrl,
+            autoLoadEntities: true,
+            synchronize: true,
+            ssl: {
+              rejectUnauthorized: false,
+            },
+          };
+        }
+        
+        // Local development fallback
+        console.log('Using local MySQL configuration');
+        return {
+          type: 'mysql',
+          host: configService.get<string>('DB_HOST') || 'localhost',
+          port: 3306,
+          username: configService.get<string>('DB_USERNAME') || 'root',
+          password: configService.get<string>('DB_PASSWORD') || 'root',
+          database: configService.get<string>('DB_DATABASE') || 'brazzino',
+          autoLoadEntities: true,
+          synchronize: true,
+        };
+      },
+      inject: [ConfigService],
     }),
     AuthModule,
     UsersModule,
