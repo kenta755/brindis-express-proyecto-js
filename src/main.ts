@@ -19,15 +19,26 @@ async function bootstrap() {
   const allowedOrigins = [
     'http://localhost:5173',                    // Local dev
     'http://localhost:3000',                    // Local dev alt
-    'https://brindis-express-proyecto-vue.vercel.app', // Your Vercel domain
+    'https://brindis-express-proyecto-vue.vercel.app', // Main Vercel domain
+    'https://brindis-express-proyecto-vue-fiee.vercel.app', // New deployment domain
+    'https://brindis-express-proyecto-vue-fiee-nmipllr9r-kenta755s-projects.vercel.app', // Current deployment
   ];
+  
+  // Also allow any Vercel preview deployment (pattern matching)
+  const isVercelDomain = (origin) => {
+    return origin && (
+      origin.includes('vercel.app') ||
+      origin.includes('kenta755s-projects.vercel.app')
+    );
+  };
   
   app.enableCors({
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, curl, etc)
       if (!origin) return callback(null, true);
       
-      if (allowedOrigins.includes(origin)) {
+      // Allow if in explicit list OR is a Vercel domain
+      if (allowedOrigins.includes(origin) || isVercelDomain(origin)) {
         callback(null, true);
       } else {
         console.log('Blocked by CORS:', origin);
