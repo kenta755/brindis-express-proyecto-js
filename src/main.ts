@@ -4,14 +4,18 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  // Create app with CORS enabled from the start
-  const app = await NestFactory.create(AppModule, {
-    cors: {
-      origin: true, // Allow all origins
-      credentials: true,
-      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'X-Requested-With', 'Origin'],
-    }
+  const app = await NestFactory.create(AppModule);
+  
+  // Enable CORS before any other middleware
+  app.enableCors({
+    origin: '*', // Allow ALL origins explicitly
+    credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: '*', // Allow ALL headers
+    exposedHeaders: '*',
+    maxAge: 86400,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   });
   
   app.setGlobalPrefix('api');
@@ -22,9 +26,8 @@ async function bootstrap() {
     transform: true
   }));
   
-  console.log('✅ CORS enabled for all origins');
+  console.log('✅ CORS enabled - origin: * (all origins allowed)');
 
-  // Cambia el listen para que use el puerto de Render o el 3000 por defecto
   await app.listen(process.env.PORT || 3000);
 }
 void bootstrap();
