@@ -33,14 +33,19 @@ async function bootstrap() {
     );
   };
   
-  // TEMPORARY: Allow ALL origins for testing
+  // Allow ALL origins - explicit configuration
   app.enableCors({
-    origin: true, // Allow any origin
+    origin: function (origin, callback) {
+      // Allow any origin (including undefined from curl/postman)
+      callback(null, origin || '*');
+    },
     credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Accept, Authorization, X-Requested-With, Origin',
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'X-Requested-With', 'Origin'],
+    exposedHeaders: ['Access-Control-Allow-Origin'],
+    maxAge: 86400, // 24 hours
   });
-  console.log('⚠️ CORS configured to allow ALL origins (development mode)');
+  console.log('✅ CORS configured to allow ALL origins');
 
   // Cambia el listen para que use el puerto de Render o el 3000 por defecto
   await app.listen(process.env.PORT || 3000);
