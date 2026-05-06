@@ -22,6 +22,7 @@ async function bootstrap() {
     'https://brindis-express-proyecto-vue.vercel.app', // Main Vercel domain
     'https://brindis-express-proyecto-vue-fiee.vercel.app', // New deployment domain
     'https://brindis-express-proyecto-vue-fiee-nmipllr9r-kenta755s-projects.vercel.app', // Current deployment
+    'https://brindis-express-proyecto-vue-fiee-him52yka-kenta755s-projects.vercel.app', // Latest deployment
   ];
   
   // Also allow any Vercel preview deployment (pattern matching)
