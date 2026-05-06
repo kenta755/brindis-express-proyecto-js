@@ -33,28 +33,14 @@ async function bootstrap() {
     );
   };
   
+  // TEMPORARY: Allow ALL origins for testing
   app.enableCors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, etc)
-      if (!origin) return callback(null, true);
-      
-      console.log('🔍 CORS check - Origin:', origin);
-      console.log('🔍 Allowed origins:', allowedOrigins);
-      console.log('🔍 Is Vercel domain:', isVercelDomain(origin));
-      
-      // Allow if in explicit list OR is a Vercel domain
-      if (allowedOrigins.includes(origin) || isVercelDomain(origin)) {
-        console.log('✅ CORS allowed');
-        callback(null, true);
-      } else {
-        console.log('❌ Blocked by CORS:', origin);
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: true, // Allow any origin
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Accept, Authorization, X-Requested-With',
+    allowedHeaders: 'Content-Type, Accept, Authorization, X-Requested-With, Origin',
   });
+  console.log('⚠️ CORS configured to allow ALL origins (development mode)');
 
   // Cambia el listen para que use el puerto de Render o el 3000 por defecto
   await app.listen(process.env.PORT || 3000);
