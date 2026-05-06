@@ -38,17 +38,22 @@ async function bootstrap() {
       // Allow requests with no origin (mobile apps, curl, etc)
       if (!origin) return callback(null, true);
       
+      console.log('🔍 CORS check - Origin:', origin);
+      console.log('🔍 Allowed origins:', allowedOrigins);
+      console.log('🔍 Is Vercel domain:', isVercelDomain(origin));
+      
       // Allow if in explicit list OR is a Vercel domain
       if (allowedOrigins.includes(origin) || isVercelDomain(origin)) {
+        console.log('✅ CORS allowed');
         callback(null, true);
       } else {
-        console.log('Blocked by CORS:', origin);
+        console.log('❌ Blocked by CORS:', origin);
         callback(new Error('Not allowed by CORS'));
       }
     },
     credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type, Accept, Authorization',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization, X-Requested-With',
   });
 
   // Cambia el listen para que use el puerto de Render o el 3000 por defecto
