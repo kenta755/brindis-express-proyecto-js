@@ -4,30 +4,35 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   
-  // MANUAL CORS middleware - forces headers on EVERY request
-  app.use((req, res, next) => {
-    const origin = req.headers.origin || '*';
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With, Origin');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Max-Age', '86400');
+  // Get underlying Express instance for early middleware
+  const expressApp = app.getHttpAdapter().getInstance();
+  
+  // CORS BEFORE everything else - including global prefix
+  expressApp.use((req, res, next) => {
+    const origin = req.headers.origin;
     
-    // Handle preflight
+    // Allow the requesting origin or wildcard
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Max-Age', '86400');
+    
+    // Handle preflight immediately
     if (req.method === 'OPTIONS') {
-      return res.status(204).end();
+      res.status(204).end();
+      return;
     }
+    
     next();
   });
   
-  // Also enable NestJS built-in CORS as backup
+  // Also enable NestJS built-in CORS
   app.enableCors({
-    origin: '*',
+    origin: true,
     credentials: true,
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: '*',
   });
   
   app.setGlobalPrefix('api');
@@ -38,8 +43,9 @@ async function bootstrap() {
     transform: true
   }));
   
-  console.log('✅ MANUAL CORS middleware enabled');
+  console.log('✅ CORS configured at Express level');
 
   await app.listen(process.env.PORT || 3000);
+  console.log(`🚀 Server running on port ${process.env.PORT || 3000}`);
 }
 void bootstrap();
