@@ -5,16 +5,14 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   // Create app with CORS options at creation time
-  const app = await NestFactory.create(AppModule, {
-    cors: {
-      origin: (origin, callback) => {
-        // Allow any origin
-        callback(null, true);
-      },
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-      credentials: true,
-      allowedHeaders: '*',
-    }
+  const app = await NestFactory.create(AppModule);
+  
+  // Habilitar CORS de forma explícita y robusta
+  app.enableCors({
+    origin: true, // Permite cualquier origen (para pruebas)
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    allowedHeaders: 'Content-Type, Accept, Authorization',
   });
   
   // Apply global prefix AFTER CORS setup
