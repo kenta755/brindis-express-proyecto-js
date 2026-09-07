@@ -39,21 +39,20 @@ import { WebSocketModule } from './websocket/websocket.module';
         if (databaseUrl) {
           console.log('Using DATABASE_URL for PostgreSQL connection');
           
-          // Check if using private Railway networking (.internal domains)
-          // These don't work well in all cases, so we warn
           if (databaseUrl.includes('.railway.internal')) {
             console.warn('WARNING: Using private Railway database URL (.railway.internal)');
             console.warn('If connection fails, use the PUBLIC database URL instead');
           }
+          
+          const isLocalhost = databaseUrl.includes('localhost') || databaseUrl.includes('127.0.0.1');
           
           return {
             type: 'postgres',
             url: databaseUrl,
             autoLoadEntities: true,
             synchronize: true,
-            ssl: isRailway ? { rejectUnauthorized: false } : false,
+            ssl: isLocalhost ? false : { rejectUnauthorized: false },
             extra: {
-              // Connection pool settings for Railway
               max: 10,
               connectionTimeoutMillis: 30000,
               idleTimeoutMillis: 10000,
